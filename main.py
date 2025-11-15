@@ -53,15 +53,15 @@ def frob_a(coef: np.ndarray) -> np.ndarray | None:
         (np.ndarray): Macierz Frobeniusa o rozmiarze (n,n).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    if not isinstance(coef, np.ndarray) or coef.ndim!=1:
+    if not isinstance(coef, np.ndarray) or coef.ndim!=1 or len(coef) <3 or coef[-1] == 0:
         return None
     
     a_n = coef[-1]
-    F_a = -coef[:-2]/a_n
+    F_a = -coef[:-1]/a_n
     F_core = np.diagflat(np.ones(len(coef)-2))
-    F_0 = np.zeros(len(coef)-2,1)
+    F_0 = np.zeros((len(coef)-2,1))
     F_0_core = np.concatenate((F_0, F_core), axis=1)
-    return np.concatenate((F_0_core, F_a), axis=0)
+    return np.concatenate((F_0_core, F_a.reshape(1,-1)), axis=0)
 
 
 def is_nonsingular(A: np.ndarray) -> bool | None:
@@ -76,4 +76,13 @@ def is_nonsingular(A: np.ndarray) -> bool | None:
             wypadku `False`.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not isinstance(A, np.ndarray) or A.ndim!=2:
+        return None
+
+    i,j = np.shape(A)
+    if i!=j:
+        return None
+
+    rank = np.linalg.matrix_rank(A)
+
+    return i==rank
